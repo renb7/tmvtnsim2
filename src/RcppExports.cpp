@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rtmvnorm
-arma::mat rtmvnorm(const arma::mat& mean, const arma::mat& sigma, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
-RcppExport SEXP _tmvtnsim_rtmvnorm(SEXP meanSEXP, SEXP sigmaSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
+// rtmvnormcpp
+arma::mat rtmvnormcpp(const arma::mat& mean, const arma::mat& sigma, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
+RcppExport SEXP _tmvtnsim_rtmvnormcpp(SEXP meanSEXP, SEXP sigmaSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,13 +24,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type upper(upperSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const arma::uword >::type burn(burnSEXP);
-    rcpp_result_gen = Rcpp::wrap(rtmvnorm(mean, sigma, blc, lower, upper, init, burn));
+    rcpp_result_gen = Rcpp::wrap(rtmvnormcpp(mean, sigma, blc, lower, upper, init, burn));
     return rcpp_result_gen;
 END_RCPP
 }
-// rtmvt
-arma::mat rtmvt(const arma::mat& mean, const arma::mat& sigma, const double nu, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
-RcppExport SEXP _tmvtnsim_rtmvt(SEXP meanSEXP, SEXP sigmaSEXP, SEXP nuSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
+// rtmvtcpp
+arma::mat rtmvtcpp(const arma::mat& mean, const arma::mat& sigma, const double nu, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
+RcppExport SEXP _tmvtnsim_rtmvtcpp(SEXP meanSEXP, SEXP sigmaSEXP, SEXP nuSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,7 +42,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type upper(upperSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const arma::uword >::type burn(burnSEXP);
-    rcpp_result_gen = Rcpp::wrap(rtmvt(mean, sigma, nu, blc, lower, upper, init, burn));
+    rcpp_result_gen = Rcpp::wrap(rtmvtcpp(mean, sigma, nu, blc, lower, upper, init, burn));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -94,9 +94,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rtnorm
-arma::vec rtnorm(const arma::vec& mean, const double sd, const arma::vec& lower, const arma::vec& upper);
-RcppExport SEXP _tmvtnsim_rtnorm(SEXP meanSEXP, SEXP sdSEXP, SEXP lowerSEXP, SEXP upperSEXP) {
+// rtnormcpp
+arma::vec rtnormcpp(const arma::vec& mean, const double sd, const arma::vec& lower, const arma::vec& upper);
+RcppExport SEXP _tmvtnsim_rtnormcpp(SEXP meanSEXP, SEXP sdSEXP, SEXP lowerSEXP, SEXP upperSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -104,19 +104,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type sd(sdSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type lower(lowerSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type upper(upperSEXP);
-    rcpp_result_gen = Rcpp::wrap(rtnorm(mean, sd, lower, upper));
+    rcpp_result_gen = Rcpp::wrap(rtnormcpp(mean, sd, lower, upper));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tmvtnsim_rtmvnorm", (DL_FUNC) &_tmvtnsim_rtmvnorm, 7},
-    {"_tmvtnsim_rtmvt", (DL_FUNC) &_tmvtnsim_rtmvt, 8},
+    {"_tmvtnsim_rtmvnormcpp", (DL_FUNC) &_tmvtnsim_rtmvnormcpp, 7},
+    {"_tmvtnsim_rtmvtcpp", (DL_FUNC) &_tmvtnsim_rtmvtcpp, 8},
     {"_tmvtnsim_norm_rej", (DL_FUNC) &_tmvtnsim_norm_rej, 2},
     {"_tmvtnsim_unif_rej", (DL_FUNC) &_tmvtnsim_unif_rej, 2},
     {"_tmvtnsim_halfnorm_rej", (DL_FUNC) &_tmvtnsim_halfnorm_rej, 2},
     {"_tmvtnsim_exp_rej", (DL_FUNC) &_tmvtnsim_exp_rej, 2},
-    {"_tmvtnsim_rtnorm", (DL_FUNC) &_tmvtnsim_rtnorm, 4},
+    {"_tmvtnsim_rtnormcpp", (DL_FUNC) &_tmvtnsim_rtnormcpp, 4},
     {NULL, NULL, 0}
 };
 

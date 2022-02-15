@@ -3,20 +3,16 @@ test_that("full-rank, identical means, lower and upper bounds", {
   rho <- 0.9
   sigma <- matrix(0, nrow=d, ncol=d)
   sigma <- rho^abs(row(sigma) - col(sigma))
-  D1 <- diag(1,d) # Full rank
+  D1 <- diag(1,d)
   
   set.seed(1203)
-  ans.1 <- tmvmixnorm::rtmvn(n=1000, Mean=1:d, sigma, D=D1, lower=rep(-1,d), upper=rep(1,d),
-                             int=rep(0,d), burn=50, thin=0)
+  ans.1 <- tmvmixnorm::rtmvn(n=1000, Mean=1:d, sigma, D=D1, lower=rep(-1,d), 
+                             upper=rep(1,d), int=rep(0,d), burn=50, thin=0)
   chk.1 <- apply(ans.1, 2, summary)
   
   set.seed(1203)
-  n = 1000;
-  mean = matrix(rep(1:d,n), nrow=n, ncol=d, byrow=TRUE)
-  lower = matrix(rep(-1,d), nrow=1);
-  upper = matrix(rep(1,d), nrow=1);
-  init = matrix(rep(0,d), nrow=1);
-  ans.1b = rtmvnorm(mean, sigma, D1, lower, upper, init, burn=50)
+  ans.1b = rtmvnorm(mean=1:d, sigma, D1, lower=-1, upper=1, init=0, 
+                    burn=50, n=1000)
   chk.1b <- apply(ans.1b, 2, summary)
   
   expect_equal(chk.1, chk.1b)
@@ -28,20 +24,15 @@ test_that("non-full rank, identical means, lower and upper bounds", {
   rho <- 0.5
   sigma <- matrix(0, nrow=d, ncol=d)
   sigma <- rho^abs(row(sigma) - col(sigma))
-  D2 <- matrix(c(1,1,1,0,1,0,1,0,1),ncol=d)
-  
+  D2 <- matrix(c(1,1,1,0,1,0,1,0,1), ncol=d)
+
   set.seed(1228)
   ans.2 <- tmvmixnorm::rtmvn(n=100, Mean=1:d, sigma, D=D2, lower=rep(-1,d),
-                 upper=rep(1,d), burn=10, thin=0)
+                             upper=rep(1,d), burn=10, thin=0)
   chk.2 <- apply(ans.2, 2, summary)
   
   set.seed(1228)
-  n = 100;
-  mean = matrix(rep(1:d,n), nrow=n, ncol=d, byrow=TRUE)
-  lower = matrix(rep(-1,d), nrow=1);
-  upper = matrix(rep(1,d), nrow=1);
-  init = matrix(rep(0.8,d), nrow=1);
-  ans.2b = rtmvnorm(mean, sigma, D2, lower, upper, init, burn=10)
+  ans.2b = rtmvnorm(mean=1:d, sigma, D2, lower=-1, upper=1, burn=10, n=100)
   chk.2b <- apply(ans.2b, 2, summary)
   
   expect_equal(chk.2, chk.2b)
@@ -58,10 +49,7 @@ test_that("non-full rank, different means", {
   set.seed(3084)
   n = 100;
   mean = matrix(runif(n*d), nrow=n, ncol=d);
-  lower = matrix(rep(-1,d-1), nrow=1);
-  upper = matrix(rep(1,d-1), nrow=1);
-  init = matrix(rep(0.8,d), nrow=1);
-  ans.3 = rtmvnorm(mean, sigma, D3, lower, upper, init, burn=10)
+  ans.3 = rtmvnorm(mean, sigma, D3, lower=-1, upper=1, init=0, burn=10)
   chk.3 <- apply(ans.3, 2, summary)
 
   chk.3b = matrix(c(-0.95373733, -1.28766084, -1.38358884,
@@ -86,10 +74,7 @@ test_that("truncated mvt, non-full rank, different means", {
   n = 100;
   set.seed(3084)
   mean = matrix(runif(n*d), nrow=n, ncol=d);
-  lower = matrix(rep(-1,d-1), nrow=1);
-  upper = matrix(rep(1,d-1), nrow=1);
-  init = matrix(rep(0.8,d), nrow=1);
-  result = rtmvt(mean, sigma, nu, blc, lower, upper, init, burn=50)
+  result = rtmvt(mean, sigma, nu, blc, lower=-1, upper=1, init=0, burn=50)
   chk.4 <- apply(result, 2, summary)
   
   chk.4b = matrix(c(-1.40342755, -1.74138329, -1.68153340,

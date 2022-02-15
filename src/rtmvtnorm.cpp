@@ -3,138 +3,43 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-//' Random Generation for Truncated Multivariate Normal 
-//'
-//' Draws from truncated multivariate normal distribution subject to 
-//' linear inequality constraints represented by a matrix. 
-//' 
-//' @param mean \code{n x p} matrix of means. The number of rows is the number 
-//'   of observations. The number of columns is the dimension of the problem.
-//' @param sigma \code{p x p} covariance matrix. 
-//' @param blc \code{m x p} matrix of coefficients for linear inequality 
-//'   constraints.
-//' @param lower \code{n x m} or \code{1 x m} matrix of lower bounds for 
-//'   truncation. 
-//' @param upper \code{n x m} or \code{1 x m} matrix of upper bounds for 
-//'   truncation. 
-//' @param init \code{n x p} or \code{1 x p} matrix of initial values.
-//' @param burn Number of burn-in iterations. Defaults to 10.
-//' 
-//' @return Returns a \code{n x p} matrix of random numbers following the 
-//'   specified truncated multivariate normal distribution. 
-//'
-//' @examples
-//' # Example 1: full rank
-//' d = 3;
-//' rho = 0.9;
-//' sigma = matrix(0, d, d);
-//' sigma = rho^abs(row(sigma) - col(sigma));
-//' blc = diag(1,d);
-//' n = 1000;
-//' mean = matrix(rep(1:d,n), nrow=n, ncol=d, byrow=TRUE);
-//' lower = matrix(rep(-1,d), nrow=1);
-//' upper = matrix(rep(1,d), nrow=1);
-//' init = matrix(rep(0,d), nrow=1);
-//' set.seed(1203)
-//' result = rtmvnorm(mean, sigma, blc, lower, upper, init, burn=50)
-//' apply(result, 2, summary)
-//' 
-//' # Example 2: non-full rank, invalid initial values
-//' d = 3;
-//' rho = 0.5;
-//' sigma = matrix(0, d, d);
-//' sigma = rho^abs(row(sigma) - col(sigma));
-//' blc = matrix(c(1,1,1,0,1,0,1,0,1),ncol=d);
-//' n = 100;
-//' mean = matrix(rep(1:d,n), nrow=n, ncol=d, byrow=TRUE);
-//' lower = matrix(rep(-1,d), nrow=1);
-//' upper = matrix(rep(1,d), nrow=1);
-//' init = matrix(rep(0.8,d), nrow=1);
-//' set.seed(1228)
-//' result = rtmvnorm(mean, sigma, blc, lower, upper, init, burn=50)
-//' apply(result, 2, summary)
-//' 
-//' # Example 3: means, lower, or upper bounds differ across samples
-//' d = 3;
-//' rho = 0.5;
-//' sigma = matrix(0, d, d);
-//' sigma = rho^abs(row(sigma) - col(sigma));
-//' blc = matrix(c(1,0,1,1,1,0),nrow=d-1,ncol=d,byrow=TRUE)
-//' n = 100;
-//' set.seed(3084)
-//' mean = matrix(runif(n*d), nrow=n, ncol=d);
-//' lower = matrix(rep(-1,d-1), nrow=1);
-//' upper = matrix(rep(1,d-1), nrow=1);
-//' init = matrix(rep(0.8,d), nrow=1);
-//' result = rtmvnorm(mean, sigma, blc, lower, upper, init, burn=50)
-//' apply(result, 2, summary)
-//' 
-//' @export
 // [[Rcpp::export]]
-arma::mat rtmvnorm(const arma::mat& mean, 
-                   const arma::mat& sigma, 
-                   const arma::mat& blc,
-                   const arma::mat& lower, 
-                   const arma::mat& upper,
-                   arma::mat& init,
-                   const arma::uword burn = 10) {
+arma::mat rtmvnormcpp(const arma::mat& mean, 
+                      const arma::mat& sigma, 
+                      const arma::mat& blc,
+                      const arma::mat& lower, 
+                      const arma::mat& upper,
+                      arma::mat& init,
+                      const arma::uword burn = 10) {
   const unsigned int n=mean.n_rows, p=mean.n_cols;
   arma::mat x(n,p); // output samples
   
   // draw from truncated univariate normal
   if (p==1) {
     if (blc(0,0) > 0.0) { 
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             lower.col(0)/blc(0,0), 
             upper.col(0)/blc(0,0));
     } else if (blc(0,0) < 0.0) {
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             upper.col(0)/blc(0,0), 
             lower.col(0)/blc(0,0));
     } else {
       arma::vec lower1 {R_NegInf};
       arma::vec upper1 {R_PosInf};
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             lower1, upper1);
     }
     return x;
   }
   
-  // check dimensions
-  const unsigned int n1=lower.n_rows, n2=upper.n_rows, n3=init.n_rows;
-  const unsigned int m=blc.n_rows, m1=lower.n_cols, m2=upper.n_cols;
-  
-  if (!(n==n1 || n1==1)) {
-    Rcpp::stop("lower must be a row vector or have the same number of rows as mean");
-  }
-  
-  if (!(n1==n2 && n1==n3)) {
-    Rcpp::stop("lower, upper, and init must have the same number of rows");
-  }
-  
-  if (!(m==m1)) {
-    Rcpp::stop("lower must have as many columns as the number of constraints");
-  }
-  
-  if (!(m1==m2)) {
-    Rcpp::stop("lower and upper must have the same number of columns");
-  }
-  
-  if (!(blc.n_cols==p)) {
-    Rcpp::stop("blc must have the same number of columns as mean");
-  }
-  
-  if (!(init.n_cols==p)) {
-    Rcpp::stop("init must have the same number of columns as mean");
-  }
-  
-  
   // check boundary conditions
   if (sum(any(lower >= upper)) > 0) {
     Rcpp::stop("lower bound must be smaller than upper bound");
   }
-  
+
   // check initial values, and generate automatically if needed
+  const unsigned int n1=lower.n_rows, m=blc.n_rows;
   arma::mat blct = blc.t();
   arma::mat initc = init*blct;
   if (sum(all(initc >= lower + 1e-8 && initc <= upper - 1e-8)) < m) {
@@ -154,6 +59,7 @@ arma::mat rtmvnorm(const arma::mat& mean,
     }
     init = estimate * arma::pinv(blct);
   }
+  
   
   // check whether a matrix has identical rows
   auto f = [](const arma::mat& y) {
@@ -210,7 +116,7 @@ arma::mat rtmvnorm(const arma::mat& mean,
       // generate z(j) for truncated univariate normal
       arma::vec lowerj1(1); lowerj1(0) = lowerj;
       arma::vec upperj1(1); upperj1(0) = upperj;
-      z(j) = rtnorm(mu, 1, lowerj1, upperj1)(0);
+      z(j) = rtnormcpp(mu, 1, lowerj1, upperj1)(0);
     }
   };
   
@@ -264,120 +170,42 @@ arma::mat rtmvnorm(const arma::mat& mean,
 }
 
 
-//' Random Generation for Truncated Multivariate t 
-//'
-//' Draws from truncated multivariate t distribution subject to 
-//' linear inequality constraints represented by a matrix. 
-//' 
-//' @param mean \code{n x p} matrix of means. The number of rows is the number 
-//'   of observations. The number of columns is the dimension of the problem.
-//' @param sigma \code{p x p} covariance matrix. 
-//' @param nu degrees of freedom for Student-t distribution.
-//' @param blc \code{m x p} matrix of coefficients for linear inequality 
-//'   constraints.
-//' @param lower \code{n x m} or \code{1 x m} matrix of lower bounds for 
-//'   truncation. 
-//' @param upper \code{n x m} or \code{1 x m} matrix of upper bounds for 
-//'   truncation. 
-//' @param init \code{n x p} or \code{1 x p} matrix of initial values.
-//' @param burn Number of burn-in iterations. Defaults to 10.
-//' 
-//' @return Returns a \code{n x p} matrix of random numbers following the 
-//'   specified truncated multivariate t distribution. 
-//'
-//' @examples
-//' # Example 1: full rank
-//' d = 3;
-//' rho = 0.5;
-//' nu = 10;
-//' sigma = matrix(0, d, d);
-//' sigma = rho^abs(row(sigma) - col(sigma));
-//' blc = diag(1,d);
-//' n = 1000;
-//' mean = matrix(rep(1:d,n), nrow=n, ncol=d, byrow=TRUE);
-//' lower = matrix(rep(-1,d), nrow=1);
-//' upper = matrix(rep(1,d), nrow=1);
-//' init = matrix(rep(0.8,d), nrow=1);
-//' set.seed(1203)
-//' result = rtmvt(mean, sigma, nu, blc, lower, upper, init, burn=50)
-//' apply(result, 2, summary)
-//' 
-//' # Example 2: non-full rank, different means
-//' d = 3;
-//' rho = 0.5;
-//' sigma = matrix(0, d, d);
-//' sigma = rho^abs(row(sigma) - col(sigma));
-//' nu = 10;
-//' blc = matrix(c(1,0,1,1,1,0),nrow=d-1,ncol=d,byrow=TRUE)
-//' n = 100;
-//' set.seed(3084)
-//' mean = matrix(runif(n*d), nrow=n, ncol=d);
-//' lower = matrix(rep(-1,d-1), nrow=1);
-//' upper = matrix(rep(1,d-1), nrow=1);
-//' init = matrix(rep(0.8,d), nrow=1);
-//' result = rtmvt(mean, sigma, nu, blc, lower, upper, init, burn=50)
-//' apply(result, 2, summary)
-//'
-//' @export
 // [[Rcpp::export]]
-arma::mat rtmvt(const arma::mat& mean, 
-                const arma::mat& sigma, 
-                const double nu,
-                const arma::mat& blc,
-                const arma::mat& lower, 
-                const arma::mat& upper,
-                arma::mat& init,
-                const arma::uword burn = 10) {
+arma::mat rtmvtcpp(const arma::mat& mean, 
+                   const arma::mat& sigma, 
+                   const double nu,
+                   const arma::mat& blc,
+                   const arma::mat& lower, 
+                   const arma::mat& upper,
+                   arma::mat& init,
+                   const arma::uword burn = 10) {
   const unsigned int n=mean.n_rows, p=mean.n_cols;
   arma::mat x(n,p); // output samples
   
   // draw from truncated univariate normal
   if (p==1) {
     if (blc(0,0) > 0.0) { 
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             lower.col(0)/blc(0,0), 
             upper.col(0)/blc(0,0));
     } else if (blc(0,0) < 0.0) {
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             upper.col(0)/blc(0,0), 
             lower.col(0)/blc(0,0));
     } else {
       arma::vec lower1 {R_NegInf};
       arma::vec upper1 {R_PosInf};
-      x.col(0) = rtnorm(mean.col(0), sqrt(sigma(0,0)), 
+      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
             lower1, upper1);
     }
-    return x;
+    
+    arma::vec u(n);
+    for (arma::uword i=0; i<n; i++) {
+      u(i) = R::rchisq(nu); 
+    }
+    
+    return x/sqrt(u/nu);
   }
-  
-  // check dimensions
-  const unsigned int n1=lower.n_rows, n2=upper.n_rows, n3=init.n_rows;
-  const unsigned int m=blc.n_rows, m1=lower.n_cols, m2=upper.n_cols;
-  
-  if (!(n==n1 || n1==1)) {
-    Rcpp::stop("lower must be a row vector or have the same number of rows as mean");
-  }
-  
-  if (!(n1==n2 && n1==n3)) {
-    Rcpp::stop("lower, upper, and init must have the same number of rows");
-  }
-  
-  if (!(m==m1)) {
-    Rcpp::stop("lower must have as many columns as the number of constraints");
-  }
-  
-  if (!(m1==m2)) {
-    Rcpp::stop("lower and upper must have the same number of columns");
-  }
-  
-  if (!(blc.n_cols==p)) {
-    Rcpp::stop("blc must have the same number of columns as mean");
-  }
-  
-  if (!(init.n_cols==p)) {
-    Rcpp::stop("init must have the same number of columns as mean");
-  }
-  
   
   // check boundary conditions
   if (sum(any(lower >= upper)) > 0) {
@@ -385,6 +213,7 @@ arma::mat rtmvt(const arma::mat& mean,
   }
   
   // check initial values, and generate automatically if needed
+  const unsigned int n1=lower.n_rows, m=blc.n_rows;
   arma::mat blct = blc.t();
   arma::mat initc = init*blct;
   if (sum(all(initc >= lower + 1e-8 && initc <= upper - 1e-8)) < m) {
@@ -465,7 +294,7 @@ arma::mat rtmvt(const arma::mat& mean,
       // generate y(j) for truncated univariate normal
       arma::vec lowerj1(1); lowerj1(0) = lowerj;
       arma::vec upperj1(1); upperj1(0) = upperj;
-      y(j) = rtnorm(mu, 1, lowerj1, upperj1)(0);
+      y(j) = rtnormcpp(mu, 1, lowerj1, upperj1)(0);
     }
     
     z = y/denom; // update tmvt for this step;

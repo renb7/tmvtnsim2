@@ -49,31 +49,12 @@ double exp_rej(const double a, const double b) {
   return x;
 }
 
-//' Random Generation for Truncated Univariate Normal 
-//'
-//' Draws from truncated univariate normal distribution within an interval.
-//'  
-//' @param mean Vector of means, whose length is the number of observations. 
-//' @param sd Standard deviation. Defaults to 1.
-//' @param lower A scalar of lower bound for truncation, or a vector of 
-//'   lower bounds with the same length as \code{mean}. 
-//' @param upper A scalar of upper bound for truncation, or a vector of 
-//'   upper bounds with the same length as \code{mean}. 
-//'
-//' @return Returns a vector of random numbers following the specified 
-//'   truncated univariate normal distribution. 
-//'
-//' @examples
-//' set.seed(1203)
-//' x = rtnorm(mean=rep(1,1000), sd=2, lower=-2, upper=3)
-//' summary(x)
-//'
-//' @export
+
 // [[Rcpp::export]]
-arma::vec rtnorm(const arma::vec& mean, 
-                 const double sd, 
-                 const arma::vec& lower, 
-                 const arma::vec& upper) {
+arma::vec rtnormcpp(const arma::vec& mean, 
+                    const double sd, 
+                    const arma::vec& lower, 
+                    const arma::vec& upper) {
   const unsigned int n=mean.n_elem, n1=lower.n_elem, n2=upper.n_elem;
   
   // check dimensions
