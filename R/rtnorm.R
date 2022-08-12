@@ -24,7 +24,7 @@
 #' summary(x)
 #' 
 #' @export
-rtnorm <- function(mean=mean, sd=sd, lower=lower, upper=upper, n=NULL) {
+rtnorm <- function(mean, sd=1, lower, upper, n=NULL) {
   if (is.null(n)) {
     n = length(mean);
   } else if (n >= 1) {

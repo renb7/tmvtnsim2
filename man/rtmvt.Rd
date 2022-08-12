@@ -5,12 +5,12 @@
 \title{Random Generation for Truncated Multivariate t}
 \usage{
 rtmvt(
-  mean = mean,
-  sigma = sigma,
-  nu = nu,
+  mean,
+  sigma,
+  nu,
   blc = NULL,
-  lower = lower,
-  upper = upper,
+  lower,
+  upper,
   init = NULL,
   burn = 10,
   n = NULL

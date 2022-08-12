@@ -38,7 +38,7 @@
 #' result = rtmvnorm(mean=1:d, sigma, blc, -1, 1, burn=50, n=1000)
 #' apply(result, 2, summary)
 #'
-#' # Example 3: non-full rank blc, invalid initial values
+#' # Example 3: non-full rank blc
 #' d = 3;
 #' rho = 0.5;
 #' sigma = matrix(0, d, d);
@@ -68,9 +68,15 @@
 #' apply(result, 2, summary)
 #' 
 #' @export
-rtmvnorm <- function(mean=mean, sigma=sigma, blc=NULL, lower=lower, 
-                     upper=upper, init=NULL, burn=10, n=NULL) {
-  p = ncol(sigma);
+rtmvnorm <- function(mean, sigma, blc=NULL, lower, 
+                     upper, init=NULL, burn=10, n=NULL) {
+  if (is.matrix(sigma)) {
+    p = ncol(sigma);
+  } else {
+    p = 1;
+    sigma = as.matrix(sigma);
+  }
+  
   mean = matrix(mean, ncol=p);
   
   if (is.null(blc)) {
@@ -80,6 +86,7 @@ rtmvnorm <- function(mean=mean, sigma=sigma, blc=NULL, lower=lower,
   }
   
   m = nrow(blc);
+
   lower = matrix(lower, ncol=m);
   upper = matrix(upper, ncol=m);
   

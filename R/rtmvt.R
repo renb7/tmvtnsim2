@@ -54,9 +54,15 @@
 #' apply(result, 2, summary)
 #'
 #' @export
-rtmvt <- function(mean=mean, sigma=sigma, nu=nu, blc=NULL, lower=lower, 
-                  upper=upper, init=NULL, burn=10, n=NULL) {
-  p = ncol(sigma);
+rtmvt <- function(mean, sigma, nu, blc=NULL, lower, 
+                  upper, init=NULL, burn=10, n=NULL) {
+  if (is.matrix(sigma)) {
+    p = ncol(sigma);
+  } else {
+    p = 1;
+    sigma = as.matrix(sigma);
+  }
+  
   mean = matrix(mean, ncol=p);
   
   if (is.null(blc)) {
@@ -66,6 +72,7 @@ rtmvt <- function(mean=mean, sigma=sigma, nu=nu, blc=NULL, lower=lower,
   }
   
   m = nrow(blc);
+
   lower = matrix(lower, ncol=m);
   upper = matrix(upper, ncol=m);
   

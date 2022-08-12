@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // rtmvnormcpp
-arma::mat rtmvnormcpp(const arma::mat& mean, const arma::mat& sigma, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
+arma::mat rtmvnormcpp(const arma::mat& mean, const arma::mat& sigma, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, const arma::mat& init, const arma::uword burn);
 RcppExport SEXP _tmvtnsim_rtmvnormcpp(SEXP meanSEXP, SEXP sigmaSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -22,14 +22,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type blc(blcSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type lower(lowerSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type upper(upperSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type init(initSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const arma::uword >::type burn(burnSEXP);
     rcpp_result_gen = Rcpp::wrap(rtmvnormcpp(mean, sigma, blc, lower, upper, init, burn));
     return rcpp_result_gen;
 END_RCPP
 }
 // rtmvtcpp
-arma::mat rtmvtcpp(const arma::mat& mean, const arma::mat& sigma, const double nu, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, arma::mat& init, const arma::uword burn);
+arma::mat rtmvtcpp(const arma::mat& mean, const arma::mat& sigma, const double nu, const arma::mat& blc, const arma::mat& lower, const arma::mat& upper, const arma::mat& init, const arma::uword burn);
 RcppExport SEXP _tmvtnsim_rtmvtcpp(SEXP meanSEXP, SEXP sigmaSEXP, SEXP nuSEXP, SEXP blcSEXP, SEXP lowerSEXP, SEXP upperSEXP, SEXP initSEXP, SEXP burnSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -40,7 +40,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type blc(blcSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type lower(lowerSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type upper(upperSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type init(initSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const arma::uword >::type burn(burnSEXP);
     rcpp_result_gen = Rcpp::wrap(rtmvtcpp(mean, sigma, nu, blc, lower, upper, init, burn));
     return rcpp_result_gen;

@@ -4,7 +4,7 @@
 \alias{rtnorm}
 \title{Random Generation for Truncated Univariate Normal}
 \usage{
-rtnorm(mean = mean, sd = sd, lower = lower, upper = upper, n = NULL)
+rtnorm(mean, sd = 1, lower, upper, n = NULL)
 }
 \arguments{
 \item{mean}{vector of means. The length is the number of observations.}

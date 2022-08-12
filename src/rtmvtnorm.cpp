@@ -9,7 +9,7 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
                       const arma::mat& blc,
                       const arma::mat& lower, 
                       const arma::mat& upper,
-                      arma::mat& init,
+                      const arma::mat& init,
                       const arma::uword burn = 10) {
   const unsigned int n=mean.n_rows, p=mean.n_cols;
   arma::mat x(n,p); // output samples
@@ -25,10 +25,8 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
             upper.col(0)/blc(0,0), 
             lower.col(0)/blc(0,0));
     } else {
-      arma::vec lower1 {R_NegInf};
-      arma::vec upper1 {R_PosInf};
-      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
-            lower1, upper1);
+      arma::vec z = Rcpp::rnorm(n);
+      x.col(0) = z*sqrt(sigma(0,0)) + mean.col(0);   
     }
     return x;
   }
@@ -42,6 +40,7 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
   const unsigned int n1=lower.n_rows, m=blc.n_rows;
   arma::mat blct = blc.t();
   arma::mat initc = init*blct;
+  arma::mat initx(n1,p);
   if (sum(all(initc >= lower + 1e-8 && initc <= upper - 1e-8)) < m) {
     arma::mat estimate(n1,m);
     for (arma::uword i=0; i<n1; i++) {
@@ -57,7 +56,7 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
         }
       }
     }
-    init = estimate * arma::pinv(blct);
+    initx = estimate * arma::pinv(blct);
   }
   
   
@@ -85,7 +84,7 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
   arma::mat R = blc*cholt;
   arma::uvec js(p);
   std::iota(js.begin(), js.end(), 0);
-  Rcpp::NumericVector mu {0}; 
+  arma::vec mu(1); mu.fill(0); 
   
   // Gibbs step for sampling truncated multivariate normal
   auto g = [p, m, R, js, mu](arma::vec a, arma::vec b, arma::vec& z) {
@@ -129,7 +128,7 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
     mean1 = arma::trans(mean.row(0));
     lower1 = arma::trans(lower.row(0));
     upper1 = arma::trans(upper.row(0));
-    init1 = arma::trans(init.row(0));
+    init1 = arma::trans(initx.row(0));
     
     a = lower1 - blc*mean1;
     b = upper1 - blc*mean1;
@@ -146,26 +145,37 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
   if (n1==1) {
     lower1 = arma::trans(lower.row(0));
     upper1 = arma::trans(upper.row(0));
-    init1 = arma::trans(init.row(0));
-  }
-  
-  for (arma::uword i=0; i<n; i++) {
-    mean1 = arma::trans(mean.row(i));
-    if (n1==n) {
+    init1 = arma::trans(initx.row(0));
+    for (arma::uword i=0; i<n; i++) {
+      mean1 = arma::trans(mean.row(i));
+      
+      a = lower1 - blc*mean1;
+      b = upper1 - blc*mean1;
+      z = solve(cholt, init1-mean1);
+      
+      for (arma::uword i2=0; i2<burn+1; i2++) {
+        g(a, b, z);
+      }
+      x.row(i) = arma::trans(cholt*z + mean1);
+    }
+  } else { // n1==n
+    for (arma::uword i=0; i<n; i++) {
+      mean1 = arma::trans(mean.row(i));
       lower1 = arma::trans(lower.row(i));
       upper1 = arma::trans(upper.row(i));
-      init1 = arma::trans(init.row(i));
+      init1 = arma::trans(initx.row(i));
+
+      a = lower1 - blc*mean1;
+      b = upper1 - blc*mean1;
+      z = solve(cholt, init1-mean1);
+      
+      for (arma::uword i2=0; i2<burn+1; i2++) {
+        g(a, b, z);
+      }
+      x.row(i) = arma::trans(cholt*z + mean1);
     }
-    
-    a = lower1 - blc*mean1;
-    b = upper1 - blc*mean1;
-    z = solve(cholt, init1-mean1);
-    
-    for (arma::uword i2=0; i2<burn+1; i2++) {
-      g(a, b, z);
-    }
-    x.row(i) = arma::trans(cholt*z + mean1);
   }
+  
   return x;
 }
 
@@ -177,7 +187,7 @@ arma::mat rtmvtcpp(const arma::mat& mean,
                    const arma::mat& blc,
                    const arma::mat& lower, 
                    const arma::mat& upper,
-                   arma::mat& init,
+                   const arma::mat& init,
                    const arma::uword burn = 10) {
   const unsigned int n=mean.n_rows, p=mean.n_cols;
   arma::mat x(n,p); // output samples
@@ -193,10 +203,8 @@ arma::mat rtmvtcpp(const arma::mat& mean,
             upper.col(0)/blc(0,0), 
             lower.col(0)/blc(0,0));
     } else {
-      arma::vec lower1 {R_NegInf};
-      arma::vec upper1 {R_PosInf};
-      x.col(0) = rtnormcpp(mean.col(0), sqrt(sigma(0,0)), 
-            lower1, upper1);
+      arma::vec z = Rcpp::rnorm(n);
+      x.col(0) = z*sqrt(sigma(0,0)) + mean.col(0);   
     }
     
     arma::vec u(n);
@@ -216,6 +224,7 @@ arma::mat rtmvtcpp(const arma::mat& mean,
   const unsigned int n1=lower.n_rows, m=blc.n_rows;
   arma::mat blct = blc.t();
   arma::mat initc = init*blct;
+  arma::mat initx(n1,p);
   if (sum(all(initc >= lower + 1e-8 && initc <= upper - 1e-8)) < m) {
     arma::mat estimate(n1,m);
     for (arma::uword i=0; i<n1; i++) {
@@ -231,7 +240,7 @@ arma::mat rtmvtcpp(const arma::mat& mean,
         }
       }
     }
-    init = estimate * arma::pinv(blct);
+    initx = estimate * arma::pinv(blct);
   }
   
   // check whether a matrix has identical rows
@@ -258,7 +267,7 @@ arma::mat rtmvtcpp(const arma::mat& mean,
   arma::mat R = blc*cholt;
   arma::uvec js(p);
   std::iota(js.begin(), js.end(), 0);
-  Rcpp::NumericVector mu {0};
+  arma::vec mu(1); mu.fill(0); 
   
   // Gibbs step for sampling truncated multivariate t
   auto g = [p, m, R, js, mu, nu](arma::vec a, arma::vec b, double u, 
@@ -309,7 +318,7 @@ arma::mat rtmvtcpp(const arma::mat& mean,
     mean1 = arma::trans(mean.row(0));
     lower1 = arma::trans(lower.row(0));
     upper1 = arma::trans(upper.row(0));
-    init1 = arma::trans(init.row(0));
+    init1 = arma::trans(initx.row(0));
     
     a = lower1 - blc*mean1;
     b = upper1 - blc*mean1;
@@ -327,27 +336,39 @@ arma::mat rtmvtcpp(const arma::mat& mean,
   if (n1==1) {
     lower1 = arma::trans(lower.row(0));
     upper1 = arma::trans(upper.row(0));
-    init1 = arma::trans(init.row(0));
-  }
-  
-  for (arma::uword i=0; i<n; i++) {
-    mean1 = arma::trans(mean.row(i));
-    if (n1==n) {
+    init1 = arma::trans(initx.row(0));
+    for (arma::uword i=0; i<n; i++) {
+      mean1 = arma::trans(mean.row(i));
+      
+      a = lower1 - blc*mean1;
+      b = upper1 - blc*mean1;
+      z = solve(cholt, init1-mean1);
+      
+      for (arma::uword i2=0; i2<burn+1; i2++) {
+        double u = R::rchisq(nu);
+        g(a, b, u, z);
+      }
+      x.row(i) = arma::trans(cholt*z + mean1);
+    }
+  } else {
+    for (arma::uword i=0; i<n; i++) {
+      mean1 = arma::trans(mean.row(i));
       lower1 = arma::trans(lower.row(i));
       upper1 = arma::trans(upper.row(i));
-      init1 = arma::trans(init.row(i));
+      init1 = arma::trans(initx.row(i));
+      
+      a = lower1 - blc*mean1;
+      b = upper1 - blc*mean1;
+      z = solve(cholt, init1-mean1);
+      
+      for (arma::uword i2=0; i2<burn+1; i2++) {
+        double u = R::rchisq(nu);
+        g(a, b, u, z);
+      }
+      x.row(i) = arma::trans(cholt*z + mean1);
     }
-    
-    a = lower1 - blc*mean1;
-    b = upper1 - blc*mean1;
-    z = solve(cholt, init1-mean1);
-    
-    for (arma::uword i2=0; i2<burn+1; i2++) {
-      double u = R::rchisq(nu);
-      g(a, b, u, z);
-    }
-    x.row(i) = arma::trans(cholt*z + mean1);
   }
+  
   return x;
 }
 

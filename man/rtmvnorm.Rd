@@ -5,11 +5,11 @@
 \title{Random Generation for Truncated Multivariate Normal}
 \usage{
 rtmvnorm(
-  mean = mean,
-  sigma = sigma,
+  mean,
+  sigma,
   blc = NULL,
-  lower = lower,
-  upper = upper,
+  lower,
+  upper,
   init = NULL,
   burn = 10,
   n = NULL
@@ -63,7 +63,7 @@ set.seed(1203)
 result = rtmvnorm(mean=1:d, sigma, blc, -1, 1, burn=50, n=1000)
 apply(result, 2, summary)
 
-# Example 3: non-full rank blc, invalid initial values
+# Example 3: non-full rank blc
 d = 3;
 rho = 0.5;
 sigma = matrix(0, d, d);
