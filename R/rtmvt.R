@@ -110,6 +110,10 @@ rtmvt <- function(mean, sigma, nu, blc=NULL, lower,
     stop("init must have the same number of rows as lower and upper");
   }
   
-  rtmvtcpp(mean, sigma, nu, blc, lower, upper, init, burn);
+  x = rtmvtcpp(mean, sigma, nu, blc, lower, upper, init, burn);
+  if (p==1) {
+    x = as.vector(x);
+  }
+  x
 }
 

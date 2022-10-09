@@ -46,6 +46,6 @@ rtnorm <- function(mean, sd=1, lower, upper, n=NULL) {
     stop("lower and upper must have the same length");
   }
   
-  rtnormcpp(mean, sd, lower, upper);
+  as.vector(rtnormcpp(mean, sd, lower, upper))
 }
 

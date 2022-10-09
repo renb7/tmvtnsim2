@@ -1,12 +1,12 @@
-52ca0c2290dffbed13866677f692c933 *DESCRIPTION
+3397f5d033cb54d74bc2bd1ce2f65ac6 *DESCRIPTION
 df37023723230e125047d23a2677defb *NAMESPACE
 b0b2a7169eaa6fb056b2a88e02656af4 *R/RcppExports.R
-7dfe2bd53018ae343995e8e173bff63d *R/rtmvnorm.R
-f56a257e312a318a23030dda59e1dcfe *R/rtmvt.R
-f4629eecacddae8cbf0f9743b754214f *R/rtnorm.R
+fdcecae8a48ba06e6e7ab79e4e102916 *R/rtmvnorm.R
+44242049940c94ddbf04d7d521a29961 *R/rtmvt.R
+74294675fdeb8277486ce9d37cbdf155 *R/rtnorm.R
 678a73d796daa1a3a0d99a6700d1edf4 *R/tmvtnsim-package.R
 1266bbdb7789a2db104c27231d581e98 *README.md
-44028ef51906e352f3e5430ffcef49c7 *build/partial.rdb
+0996654336abeb612ea1594fba3ba812 *build/partial.rdb
 6c851c9de4a03dea8f7cfe7c8dffe81b *man/rtmvnorm.Rd
 3d1e706a1f0925323afea5471672ad1c *man/rtmvt.Rd
 98059e42d585268f63c006081076ee1d *man/rtnorm.Rd
