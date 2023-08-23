@@ -32,9 +32,9 @@ arma::mat rtmvnormcpp(const arma::mat& mean,
   }
   
   // check boundary conditions
-  if (sum(any(lower >= upper)) > 0) {
-    Rcpp::stop("lower bound must be smaller than upper bound");
-  }
+  // if (sum(any(lower >= upper)) > 0) {
+  //   Rcpp::stop("lower bound must be smaller than upper bound");
+  // }
 
   // check initial values, and generate automatically if needed
   const unsigned int n1=lower.n_rows, m=blc.n_rows;
